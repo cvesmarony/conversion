@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 """Collect Genus report numbers into results/summary.csv.
 
-usage: parse_reports.py <run_dir> KEY=VAL ...
+usage: parse_reports.py <reports_dir> KEY=VAL ...
 Report formats differ slightly between Genus versions; check the first run
 against the raw reports in <run_dir>/reports and tweak the regexes if needed.
 Missing values are written as NA.
 """
 import csv, os, re, sys
 
-run = sys.argv[1]
+rep = sys.argv[1]
 meta = dict(a.split("=", 1) for a in sys.argv[2:])
-rep = os.path.join(run, "reports")
 
 
 def read(name):

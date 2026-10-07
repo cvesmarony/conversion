@@ -1,0 +1,8 @@
+// file list for xrun (paths relative to work/); package first
++incdir+../rtl
+../rtl/Convert_Defs.sv
+../rtl/Refresh.sv
+../rtl/PRNG.sv
+../rtl/TTable.sv
+../rtl/Convert_Core.sv
+../tb/convert_core_tb.sv
