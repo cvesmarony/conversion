@@ -58,7 +58,7 @@ tell_date:
 	echo $(DATE)
 
 sim: dirs
-	$(XRUN) -sv -gui -64bit -lwdgen -access rwc -verisium +incdir+../rtl -top tb -f ../rtl/lab1.vc -l ./simulation.log
+	$(XRUN) -sv -gui -64bit -lwdgen -access rwc -verisium +incdir+../rtl -top tb -f ../rtl/convert.vc -l ./simulation.log
 
 # Convert_Core self-checking testbench (prints ALL TESTS PASSED / TEST FAILED)
 sim_conv: dirs
