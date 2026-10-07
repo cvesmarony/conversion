@@ -1,3 +1,17 @@
+SYNOPSYS = licenses/synopsys
+CADENCE = licenses/cadence
+
+MODULE = . /usr/share/Modules/init/sh; module load $(SYNOPSYS) $(CADENCE)
+
+GENUS   = tools/genus/21.18
+INNOVUS = tools/innovus/21.18
+
+XCELIUM   = tools/xcelium/23.03
+VERISIUM  = tools/verisium/24.09
+#####################################
+#          INVOKE TOOLS             #
+#####################################
+
 #####################################
 #COMPILE = cd work; $(MODULE) $(DC); time dc_shell-xg-t -64bit
 COMPILE = cd work; $(MODULE) $(GENUS); time genus
