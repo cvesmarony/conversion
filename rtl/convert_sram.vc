@@ -6,4 +6,4 @@
 ../rtl/sram_1rw.sv
 ../rtl/TTable_macro.sv
 ../rtl/Convert_Core.sv
-../tb/convert_core_tb.sv
+../tb/Convert_Core_tb.sv
