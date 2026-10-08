@@ -93,7 +93,7 @@ sim_conv: dirs
 	$(XRUN) -sv -64bit -access +r -timescale 1ns/1ps +define+CORE_MODULE=$(CORE_MODULE)+CORE_RST=$(CORE_RST) -top Convert_Core_tb -f ../rtl/convert.vc -l ./simulation.log
 
 sim_conv_sram: dirs
-	$(XRUN) -sv -64bit -access +r -timescale 1ns/1ps +nospecify +notimingchecks +define+USE_SRAM_MACRO+SRAM_CELL=$(SRAM_CELL)+SRAM_DEPTH=$(SRAM_DEPTH)+SRAM_WIDTH=$(SRAM_WIDTH)+SRAM_RTSEL_V=$(SRAM_RTSEL_V)+SRAM_WTSEL_V=$(SRAM_WTSEL_V)+CORE_MODULE=$(CORE_MODULE)+CORE_RST=$(CORE_RST) -top convert_core_tb -f ../rtl/convert_sram.vc $(SRAM_VMODEL) -l ./simulation.log
+	$(XRUN) -sv -64bit -access +r -timescale 1ns/1ps +nospecify +notimingchecks +define+USE_SRAM_MACRO+SRAM_CELL=$(SRAM_CELL)+SRAM_DEPTH=$(SRAM_DEPTH)+SRAM_WIDTH=$(SRAM_WIDTH)+SRAM_RTSEL_V=$(SRAM_RTSEL_V)+SRAM_WTSEL_V=$(SRAM_WTSEL_V)+CORE_MODULE=$(CORE_MODULE)+CORE_RST=$(CORE_RST) -top Convert_Core_tb -f ../rtl/convert_sram.vc $(SRAM_VMODEL) -l ./simulation.log
 
 sim_conv_gui: dirs
 	$(XRUN) -sv -gui -64bit -lwdgen -access rwc -verisium -timescale 1ns/1ps +define+CORE_MODULE=$(CORE_MODULE)+CORE_RST=$(CORE_RST) -top Convert_Core_tb -f ../rtl/convert.vc -l ./simulation.log
