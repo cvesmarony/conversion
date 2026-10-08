@@ -14,10 +14,10 @@ module Mini_Refresh_tb;
 
     localparam int DATA_WIDTH = SHARES * H_WIDTH;
 
-    logic clk;
-    logic rst;
+    logic CLK;
+    logic RSTN;
 
-    always #5 clk <= ~clk;
+    always #5 CLK <= ~CLK;
 
     // Mini_Refresh inputs / outputs
     logic [ADDR_WIDTH-1:0] address;
@@ -34,8 +34,8 @@ module Mini_Refresh_tb;
         .Q         (Q),
         .H_MODE    (BOOLEAN)
     ) dut (
-        .clk     (clk),
-        .rst     (rst),
+        .CLK     (CLK),
+        .RSTN     (RSTN),
         .address (address),
         .start   (start),
         .result  (result),
@@ -45,14 +45,14 @@ module Mini_Refresh_tb;
     // Test
     initial begin
         // Initialize
-        clk     = 0;
-        rst     = 1;
+        CLK     = 0;
+        RSTN     = 1;
         start   = 0;
         address = 0;
 
-        repeat (2) @(posedge clk);
+        repeat (2) @(posedge CLK);
 
-        rst = 0;
+        RSTN = 0;
 
         // TEST 1
         // Put known shares into TTable at address 5.
@@ -76,7 +76,7 @@ module Mini_Refresh_tb;
         address = 12'd5;
         start   = 1'b1;
 
-        @(posedge clk);
+        @(posedge CLK);
 
         start = 1'b0;
 
@@ -108,7 +108,7 @@ module Mini_Refresh_tb;
             $display("TEST 1 PASSED: XOR of shares preserved");
         end
 
-        @(posedge clk);
+        @(posedge CLK);
 
         // TEST 2: Second table address
         $display("");
@@ -122,7 +122,7 @@ module Mini_Refresh_tb;
         address = 12'd10;
         start   = 1'b1;
 
-        @(posedge clk);
+        @(posedge CLK);
 
         start = 1'b0;
 

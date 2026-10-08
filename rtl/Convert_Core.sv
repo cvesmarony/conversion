@@ -8,8 +8,8 @@ module Convert_Core #(
     parameter int          Q       = 3329,
     parameter group_mode_t H_MODE  = BOOLEAN     // BOOLEAN: A2B (Alg 8), else B2A (Alg 3)
 )(
-    input  logic                            clk,
-    input  logic                            rst_n,
+    input  logic                            CLK,
+    input  logic                            RSTN,
 
     input  logic                            start,
     input  logic [SHARES-1:0][H_WIDTH-1:0]  x,      // sampled on start
@@ -49,10 +49,10 @@ module Convert_Core #(
     logic [DATA_W-1:0]  rdata0, rdata1, src_rdata;
 
     TTable #(.ADDR_WIDTH(H_WIDTH), .DATA_WIDTH(DATA_W)) u_bank0 (
-        .clk(clk), .we(we0), .addr(addr0), .wdata(wdata), .rdata(rdata0)
+        .CLK(CLK), .we(we0), .addr(addr0), .wdata(wdata), .rdata(rdata0)
     );
     TTable #(.ADDR_WIDTH(H_WIDTH), .DATA_WIDTH(DATA_W)) u_bank1 (
-        .clk(clk), .we(we1), .addr(addr1), .wdata(wdata), .rdata(rdata1)
+        .CLK(CLK), .we(we1), .addr(addr1), .wdata(wdata), .rdata(rdata1)
     );
 
     assign src_rdata = src_sel ? rdata1 : rdata0;
@@ -179,8 +179,8 @@ module Convert_Core #(
     // Control FSM
     assign busy = (state != S_IDLE);
 
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
+    always_ff @(posedge CLK or negedge RSTN) begin
+        if (!RSTN) begin
             state   <= S_IDLE;
             cnt     <= '0;
             round_q <= '0;

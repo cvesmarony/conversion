@@ -5,7 +5,7 @@ module PRNG_tb;
     parameter WIDTH = 12;
     parameter NUM_SAMPLES = 10000;
     
-    logic clk;
+    logic CLK;
     logic [WIDTH-1:0] address;
     logic [WIDTH-1:0] rand_out;
     
@@ -19,7 +19,7 @@ module PRNG_tb;
     );
     
     // Clock generation - use non-blocking assignment to avoid BLKSEQ
-    always #5 clk <= ~clk;
+    always #5 CLK <= ~CLK;
     
     // Test results
     int total_tests;
@@ -155,7 +155,7 @@ module PRNG_tb;
     // Main test flow
     initial begin
         // Initialize
-        clk = 0;
+        CLK = 0;
         address = '0;
         #10;
         

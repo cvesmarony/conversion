@@ -9,12 +9,12 @@ module TTable #(
     parameter int ADDR_WIDTH = 12,
     parameter int DATA_WIDTH = 36
 )(
-    input  logic                   clk,
+    input  logic                   CLK,
     input  logic                   we,
     input  logic [ADDR_WIDTH-1:0]  addr,
     input  logic [DATA_WIDTH-1:0]  wdata,
     output logic [DATA_WIDTH-1:0]  rdata
 );
-    always_ff @(posedge clk)
+    always_ff @(posedge CLK)
         rdata <= we ? wdata : (wdata ^ DATA_WIDTH'(addr));
 endmodule

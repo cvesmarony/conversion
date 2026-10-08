@@ -24,10 +24,10 @@ module convert_check #(
     localparam int MAX_CYC = 2 * SHARES * (DOMAIN + 2) + 100;
 
     // Clock / DUT
-    logic clk = 1'b0;
-    always #5 clk <= ~clk;
+    logic CLK = 1'b0;
+    always #5 CLK <= ~CLK;
 
-    logic                           rst_n;
+    logic                           RSTN;
     logic                           start;
     logic [SHARES-1:0][H_WIDTH-1:0] x;
     logic [SHARES-1:0][H_WIDTH-1:0] y;
@@ -40,8 +40,8 @@ module convert_check #(
         .Q      (Q),
         .H_MODE (H_MODE)
     ) dut (
-        .clk  (clk),
-        .rst_n(rst_n),
+        .CLK  (CLK),
+        .RSTN(RSTN),
         .start(start),
         .x    (x),
         .busy (busy),
@@ -69,17 +69,17 @@ module convert_check #(
         int exp_v, got_v;
 
         // random idle gap so runs do not always start at the same nonce phase
-        repeat ($urandom_range(0, 7)) @(negedge clk);
+        repeat ($urandom_range(0, 7)) @(negedge CLK);
 
-        @(negedge clk);
+        @(negedge CLK);
         x     = xin;
         start = 1'b1;
-        @(negedge clk);
+        @(negedge CLK);
         start = 1'b0;
 
         cyc = 0;
         while (!done && cyc < MAX_CYC) begin
-            @(negedge clk);
+            @(negedge CLK);
             cyc++;
         end
         tests++;
@@ -139,13 +139,13 @@ module convert_check #(
         pass     = 1'b0;
         errors   = 0;
         tests    = 0;
-        rst_n    = 1'b0;
+        RSTN    = 1'b0;
         start    = 1'b0;
         x        = '0;
 
-        repeat (4) @(negedge clk);
-        rst_n = 1'b1;
-        repeat (2) @(negedge clk);
+        repeat (4) @(negedge CLK);
+        RSTN = 1'b1;
+        repeat (2) @(negedge CLK);
 
         if (busy || done) begin
             errors++;

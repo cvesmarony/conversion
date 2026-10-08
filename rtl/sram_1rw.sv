@@ -5,7 +5,7 @@
 //   USE_SRAM_MACRO defined : instantiates the real macro `SRAM_CELL  (EDIT the pin map below)
 //   otherwise              : behavioural model with the same 1-cycle read latency
 module sram_1rw (
-    input  logic                              clk,
+    input  logic                              CLK,
     input  logic                              en,
     input  logic                              we,
     input  logic [$clog2(`SRAM_DEPTH)-1:0]    addr,
@@ -23,7 +23,7 @@ module sram_1rw (
     localparam logic [1:0] WTSEL_C = 2'b00;
 
     `SRAM_CELL u_macro (
-        .CLK    (clk),
+        .CLK    (CLK),
         .CEB    (~en),
         .WEB    (~we),
         .A      (addr),
@@ -39,7 +39,7 @@ module sram_1rw (
     );
 `else
     logic [`SRAM_WIDTH-1:0] mem [0:`SRAM_DEPTH-1];
-    always_ff @(posedge clk) begin
+    always_ff @(posedge CLK) begin
         if (en) begin
             if (we) mem[addr] <= din;
             dout <= mem[addr];            // old data on a write cycle

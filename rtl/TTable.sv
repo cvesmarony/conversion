@@ -6,7 +6,7 @@ module TTable #(
     parameter int ADDR_WIDTH = 12,
     parameter int DATA_WIDTH = 36
 )(
-    input  logic                   clk,
+    input  logic                   CLK,
 
     input  logic                   we,
     input  logic [ADDR_WIDTH-1:0]  addr,
@@ -19,7 +19,7 @@ module TTable #(
 
     logic [DATA_WIDTH-1:0] mem [0:DEPTH-1];
 
-    always_ff @(posedge clk) begin
+    always_ff @(posedge CLK) begin
         if (we)
             mem[addr] <= wdata;
 

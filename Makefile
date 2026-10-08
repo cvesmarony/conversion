@@ -35,7 +35,7 @@ ARITH_NAME  ?= ZQ
 
 CORE_MODULE ?= Convert_Core
 CORE_FILE   ?= Convert_Core.sv
-CORE_RST    ?= rst_n
+CORE_RST    ?= RSTN
 TTABLE_FILE ?= TTable.sv
 
 SRAM        ?= 0
@@ -108,7 +108,7 @@ compile: dirs
 # Uses the same tech/mmmc setup as compile.tcl (scripts/sweep_compile.tcl).
 synth: dirs $(TOP_SV) $(VC)
 	@mkdir -p $(REPORTS) $(RUNDIR)/results
-	export SYN_TOP=convert_top SYN_RST=rst_n SYN_VC=../data/$(TAG)/sweep.vc SYN_DATA=../data/$(TAG) \
+	export SYN_TOP=convert_top SYN_RST=RSTN SYN_VC=../data/$(TAG)/sweep.vc SYN_DATA=../data/$(TAG) \
 	       SYN_REPORTS=../reports/sweep/$(TAG) SYN_CLK_NS=$(CLK_PERIOD) SYN_OPT=$(SYN_OPT) SYN_CG=$(CG); \
 	  $(COMPILE) -files $(SCRIPTS)/sweep_compile.tcl -log synth_$(TAG) | tee $(LOGS)/synth_$(TAG).log
 	python3 $(SCRIPTS)/parse_reports.py $(REPORTS) MODE=$(MODE) SHARES=$(SHARES) H_WIDTH=$(H_WIDTH) \
@@ -116,18 +116,18 @@ synth: dirs $(TOP_SV) $(VC)
 
 wrapper: dirs $(TOP_SV) $(VC)
 
-# thin top that fixes the parameters and exposes clk / rst_n / start / x / busy / done / y
+# thin top that fixes the parameters and exposes CLK / rst_n / start / x / busy / done / y
 $(TOP_SV): FORCE
 	@mkdir -p $(DATA)
 	@echo "import Convert_Defs::*;"                                         >  $@
 	@echo "module convert_top ("                                           >> $@
-	@echo "    input  logic clk, rst_n, start,"                            >> $@
+	@echo "    input  logic CLK, RSTN, start,"                            >> $@
 	@echo "    input  logic [$(SHARES)-1:0][$(H_WIDTH)-1:0] x,"            >> $@
 	@echo "    output logic busy, done,"                                   >> $@
 	@echo "    output logic [$(SHARES)-1:0][$(H_WIDTH)-1:0] y"             >> $@
 	@echo ");"                                                             >> $@
 	@echo "  $(CORE_MODULE) #(.H_WIDTH($(H_WIDTH)), .SHARES($(SHARES)), .Q($(Q)), .H_MODE($(H_MODE_SV))) u_core ("   >> $@
-	@echo "    .clk(clk), .$(CORE_RST)(rst_n), .start(start), .x(x), .busy(busy), .done(done), .y(y));" >> $@
+	@echo "    .CLK(CLK), .$(CORE_RST)(RSTN), .start(start), .x(x), .busy(busy), .done(done), .y(y));" >> $@
 	@echo "endmodule"                                                      >> $@
 
 # generated file list, same header as scripts/rtl_src/macro.vc; paths relative to work/

@@ -11,7 +11,7 @@ module TTable #(
     parameter int ADDR_WIDTH = 12,
     parameter int DATA_WIDTH = 36
 )(
-    input  logic                   clk,
+    input  logic                   CLK,
     input  logic                   we,
     input  logic [ADDR_WIDTH-1:0]  addr,
     input  logic [DATA_WIDTH-1:0]  wdata,
@@ -42,12 +42,12 @@ module TTable #(
     end
 
     // the read data of the row addressed last cycle is the one to forward
-    always_ff @(posedge clk) row_q <= row;
+    always_ff @(posedge CLK) row_q <= row;
 
     for (genvar r = 0; r < N_ROWS; r++) begin : g_row
         for (genvar c = 0; c < N_COLS; c++) begin : g_col
             sram_1rw u_mem (
-                .clk (clk),
+                .CLK (CLK),
                 .en  (row == ROW_W'(r)),
                 .we  (we && (row == ROW_W'(r))),
                 .addr(m_addr),

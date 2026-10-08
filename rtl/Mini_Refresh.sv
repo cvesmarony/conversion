@@ -21,8 +21,8 @@ module Mini_Refresh #(
     parameter int           Q = 3329,
     parameter group_mode_t  H_MODE = BOOLEAN
 )(
-    input logic clk,
-    input logic rst,
+    input logic CLK,
+    input logic RSTN,
 
     // Start one iteration
     input logic [ADDR_WIDTH-1:0] address,
@@ -63,7 +63,7 @@ module Mini_Refresh #(
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH)
     ) table_inst (
-        .clk   (clk),
+        .CLK   (CLK),
         .we    (table_we),
         .addr  (table_addr),
         .wdata (table_wdata),
@@ -117,8 +117,8 @@ module Mini_Refresh #(
     );
 
     // Output
-    always_ff @(posedge clk) begin
-        if (rst) begin
+    always_ff @(posedge CLK) begin
+        if (!RSTN) begin
             state       <= IDLE;
             address_reg <= '0;
             result      <= '0;
