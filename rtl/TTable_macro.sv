@@ -18,7 +18,11 @@ module TTable #(
     output logic [DATA_WIDTH-1:0]  rdata
 );
     localparam int DEPTH  = 1 << ADDR_WIDTH;
+`ifdef SRAM_ROWS
+    localparam int N_ROWS = `SRAM_ROWS;      // rows actually needed (e.g. A2B uses only Q words)
+`else
     localparam int N_ROWS = (DEPTH + `SRAM_DEPTH - 1) / `SRAM_DEPTH;
+`endif
     localparam int N_COLS = (DATA_WIDTH + `SRAM_WIDTH - 1) / `SRAM_WIDTH;
     localparam int MA_W   = $clog2(`SRAM_DEPTH);
     localparam int ROW_W  = (N_ROWS > 1) ? $clog2(N_ROWS) : 1;
