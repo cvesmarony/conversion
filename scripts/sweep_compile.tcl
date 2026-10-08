@@ -20,7 +20,7 @@ set rm_task synthesis
 source -echo -verbose ../scripts/core_config.tcl
 
 set rm_core_top     [getenv SYN_TOP   convert_top]
-set rm_reset_ports  [list [getenv SYN_RST rst_n]]
+set rm_reset_ports  [list [getenv SYN_RST RSTN]]
 set SYN_VC          [getenv SYN_VC]
 set DATA            [getenv SYN_DATA    ../data/sweep]
 set REPORTS         [getenv SYN_REPORTS ../reports/sweep]

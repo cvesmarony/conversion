@@ -21,8 +21,8 @@ set rm_dft_const      [list  ] ;# Name of test control port
 # Clock and Reset Definitions
 # -----------------------------------------------------------------------------------
 
-set rm_clock_ports    [list clk]
-set rm_reset_ports    [list rst_n] 
+set rm_clock_ports    [list CLK]
+set rm_reset_ports    [list RSTN] 
 set rm_virtual_clocks [list VCLK]
 
 # -----------------------------------------------------------------------------------

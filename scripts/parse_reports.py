@@ -49,9 +49,9 @@ else:
     m = re.search(r"Slack:=\s*(-?[\d.]+)", t_txt)
     if m:
         slack_ps = float(m[1])  # Genus normally prints ps; verify on first run
-clk = float(meta.get("CLK_PERIOD", "nan"))
+CLK = float(meta.get("CLK_PERIOD", "nan"))
 slack_ns = slack_ps / 1000.0 if slack_ps is not None else None
-achieved = (clk - slack_ns) if slack_ns is not None else None
+achieved = (CLK - slack_ns) if slack_ns is not None else None
 fmax = (1000.0 / achieved) if achieved and achieved > 0 else None
 
 # ---- power (default activity: use read_tcf/read_vcd for real numbers) -------
@@ -73,10 +73,10 @@ def fmt(v, p=3):
     return "NA" if v is None else (f"{v:.{p}f}" if isinstance(v, float) else str(v))
 
 
-header = ["mode", "shares", "h_width", "q", "ttable", "clk_ns", "slack_ns", "achieved_ns",
+header = ["mode", "shares", "h_width", "q", "ttable", "CLK_ns", "slack_ns", "achieved_ns",
           "fmax_mhz", "area_total", "area_tables", "area_logic", "cells", "power_mw",
           "table_bits", "est_cycles", "est_latency_us"]
-row = [meta["MODE"], n, w, q, meta.get("TTABLE", ""), fmt(clk), fmt(slack_ns), fmt(achieved),
+row = [meta["MODE"], n, w, q, meta.get("TTABLE", ""), fmt(CLK), fmt(slack_ns), fmt(achieved),
        fmt(fmax, 1), fmt(total, 1), fmt(tables, 1), fmt(logic, 1), fmt(cells), fmt(power_mw),
        mem_bits, cycles, fmt(latency_us, 1)]
 
