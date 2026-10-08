@@ -129,7 +129,7 @@ set hold_fixing_cells [list BUFFD2BWP16P90 BUFFD4BWP16P90 BUFFD8BWP16P90 BUFFD16
 # Design Clock Period 
 # -----------------------------------------------------------------------------------
 
-set rm_clock_period 20 ;# Target clock period in ns of the macro
+set rm_clock_period 2.0 ;# Target clock period in ns of the macro
 
 # ---------------------------------------------------------------------------------------------------
 # Parameters used in Timing Characterization

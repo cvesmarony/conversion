@@ -25,18 +25,23 @@ LOGS    = $(RUNDIR)/logs
 SCRIPTS = $(RUNDIR)/scripts
 DATE    = "`date '+%m_%d_%H_%M'`"
 
-# ---- Convert_Core sweep parameters (override on the command line) ----
 MODE        ?= A2B
 SHARES      ?= 2
 CLK_PERIOD  ?= 1.0
 SYN_OPT     ?= 1
+CG          ?= 0
 SMOKE       ?= 0
-ARITH_NAME  ?= ARITHMETIC
-# names as they appear in YOUR rtl/ (see scripts/rtl_src/macro.vc)
+ARITH_NAME  ?= ZQ
+
 CORE_MODULE ?= Convert_Core
 CORE_FILE   ?= Convert_Core.sv
 CORE_RST    ?= rst_n
 TTABLE_FILE ?= TTable.sv
+
+SRAM        ?= 0
+SRAM_CELL   ?=
+SRAM_DEPTH  ?= 4096
+SRAM_WIDTH  ?= 24
 
 # SMOKE=1: tiny parameters (Q=61, 6-bit) to validate the flow in minutes
 ifeq ($(SMOKE),1)
@@ -53,6 +58,16 @@ else ifeq ($(MODE),B2A)
 H_MODE_SV = $(ARITH_NAME)
 else
 $(error MODE must be A2B or B2A)
+endif
+
+ifeq ($(SRAM),1)
+ifeq ($(strip $(SRAM_CELL)),)
+$(error SRAM=1 needs SRAM_CELL=<macro cell name>; see README)
+endif
+TTABLE_FILE = TTable_macro.sv
+SRAM_FILES  = sram_1rw.sv
+VC_DEFS     = +define+USE_SRAM_MACRO +define+SRAM_CELL=$(SRAM_CELL) +define+SRAM_DEPTH=$(SRAM_DEPTH) +define+SRAM_WIDTH=$(SRAM_WIDTH)
+SRAM_TAG    = _sram
 endif
 
 TAG     = $(MODE)_n$(SHARES)_w$(H_WIDTH)_$(CLK_PERIOD)ns
