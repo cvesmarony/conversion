@@ -1,0 +1,9 @@
+// xrun file list for the SRAM-macro build (paths relative to work/); package first
++incdir+../rtl
+../rtl/Convert_Defs.sv
+../rtl/Refresh.sv
+../rtl/PRNG.sv
+../rtl/sram_1rw.sv
+../rtl/TTable_macro.sv
+../rtl/Convert_Core.sv
+../tb/convert_core_tb.sv
