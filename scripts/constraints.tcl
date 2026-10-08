@@ -1,4 +1,4 @@
-create_clock -name CLK -period $rm_clock_period [get_ports clk]
+create_clock -name clk -period $rm_clock_period [get_ports clk]
 create_clock -name VCLK -period $rm_clock_period
 
 set_clock_uncertainty 0.02 [get_ports clk]
