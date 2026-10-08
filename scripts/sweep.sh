@@ -9,7 +9,7 @@ mkdir -p results
 for m in $MODES; do
   for n in $SHARES_LIST; do
     for p in $PERIODS; do
-      echo "=== MODE=$m SHARES=$n CLK_PERIOD=$p ==="
+      echo "MODE=$m SHARES=$n CLK_PERIOD=$p"
       make synth MODE="$m" SHARES="$n" CLK_PERIOD="$p" "$@" \
         || echo "FAILED: MODE=$m SHARES=$n CLK_PERIOD=$p" | tee -a results/failures.log
     done

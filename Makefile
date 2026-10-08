@@ -142,7 +142,7 @@ $(VC): FORCE
 	@echo "+incdir+/ee/166/CHIPKIT/ip/rtl_inc/"     >> $@
 
 sweep:
-	$(SCRIPTS)/sweep.sh
+	bash $(SCRIPTS)/sweep.sh
 
 #####################################
 #         CREATE DIRECTORIES        #
