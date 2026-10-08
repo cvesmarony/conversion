@@ -39,9 +39,10 @@ CORE_RST    ?= rst_n
 TTABLE_FILE ?= TTable.sv
 
 SRAM        ?= 0
-SRAM_CELL   ?=
-SRAM_DEPTH  ?= 4096
-SRAM_WIDTH  ?= 24
+SRAM_CELL   ?= TS1N16ADFPCLLLVTA512X45M4SWSHOD
+SRAM_DEPTH  ?= 512
+SRAM_WIDTH  ?= 45
+SRAM_VMODEL ?= /usr/cots/ip_libraries/tsmc/N16ADFP/sram/N16ADFP_SRAM/VERILOG/N16ADFP_SRAM_100a.v
 
 # SMOKE=1: tiny parameters (Q=61, 6-bit) to validate the flow in minutes
 ifeq ($(SMOKE),1)
@@ -66,18 +67,20 @@ $(error SRAM=1 needs SRAM_CELL=<macro cell name>; see README)
 endif
 TTABLE_FILE = TTable_macro.sv
 SRAM_FILES  = sram_1rw.sv
-VC_DEFS     = +define+USE_SRAM_MACRO +define+SRAM_CELL=$(SRAM_CELL) +define+SRAM_DEPTH=$(SRAM_DEPTH) +define+SRAM_WIDTH=$(SRAM_WIDTH)
+SRAM_DOMAIN = $(if $(filter A2B,$(MODE)),$(Q),$(shell awk 'BEGIN{print 2^$(H_WIDTH)}'))
+SRAM_ROWS   = $(shell awk 'BEGIN{printf "%d", ($(SRAM_DOMAIN)+$(SRAM_DEPTH)-1)/$(SRAM_DEPTH)}')
+VC_DEFS     = +define+USE_SRAM_MACRO +define+SRAM_CELL=$(SRAM_CELL) +define+SRAM_DEPTH=$(SRAM_DEPTH) +define+SRAM_WIDTH=$(SRAM_WIDTH) +define+SRAM_ROWS=$(SRAM_ROWS)
 SRAM_TAG    = _sram
 endif
 
-TAG     = $(MODE)_n$(SHARES)_w$(H_WIDTH)_$(CLK_PERIOD)ns
+TAG     = $(MODE)_n$(SHARES)_w$(H_WIDTH)_$(CLK_PERIOD)ns$(SRAM_TAG)
 DATA    = $(RUNDIR)/data/$(TAG)
 REPORTS = $(RUNDIR)/reports/sweep/$(TAG)
 TOP_SV  = $(DATA)/convert_top.sv
 VC      = $(DATA)/sweep.vc
-RTL_SRC = Convert_Defs.sv Refresh.sv PRNG.sv $(TTABLE_FILE) $(CORE_FILE)
+RTL_SRC = Convert_Defs.sv Refresh.sv PRNG.sv $(SRAM_FILES) $(TTABLE_FILE) $(CORE_FILE)
 
-.PHONY: tell_date sim sim_conv sim_conv_gui compile synth wrapper sweep dirs clean genus FORCE
+.PHONY: tell_date sim sim_conv sim_conv_sram sim_conv_gui compile synth wrapper sweep dirs clean genus FORCE
 FORCE:
 
 #####################################
@@ -93,7 +96,7 @@ sim_conv: dirs
 	$(XRUN) -sv -64bit -access +r -timescale 1ns/1ps +define+CORE_MODULE=$(CORE_MODULE)+CORE_RST=$(CORE_RST) -top Convert_Core_tb -f ../rtl/convert.vc -l ./simulation.log
 
 sim_conv_sram: dirs
-	$(XRUN) -sv -64bit -access +r -timescale 1ns/1ps +nospecify +notimingchecks +define+USE_SRAM_MACRO+SRAM_CELL=$(SRAM_CELL)+SRAM_DEPTH=$(SRAM_DEPTH)+SRAM_WIDTH=$(SRAM_WIDTH)+SRAM_RTSEL_V=$(SRAM_RTSEL_V)+SRAM_WTSEL_V=$(SRAM_WTSEL_V)+CORE_MODULE=$(CORE_MODULE)+CORE_RST=$(CORE_RST) -top Convert_Core_tb -f ../rtl/convert_sram.vc $(SRAM_VMODEL) -l ./simulation.log
+	$(XRUN) -sv -64bit -access +r -timescale 1ns/1ps +nospecify +notimingchecks +define+USE_SRAM_MACRO+SRAM_CELL=$(SRAM_CELL)+SRAM_DEPTH=$(SRAM_DEPTH)+SRAM_WIDTH=$(SRAM_WIDTH)+CORE_MODULE=$(CORE_MODULE)+CORE_RST=$(CORE_RST) -top Convert_Core_tb -f ../rtl/convert_sram.vc $(SRAM_VMODEL) -l ./simulation.log
 
 sim_conv_gui: dirs
 	$(XRUN) -sv -gui -64bit -lwdgen -access rwc -verisium -timescale 1ns/1ps +define+CORE_MODULE=$(CORE_MODULE)+CORE_RST=$(CORE_RST) -top Convert_Core_tb -f ../rtl/convert.vc -l ./simulation.log
@@ -106,7 +109,7 @@ compile: dirs
 synth: dirs $(TOP_SV) $(VC)
 	@mkdir -p $(REPORTS) $(RUNDIR)/results
 	export SYN_TOP=convert_top SYN_RST=rst_n SYN_VC=../data/$(TAG)/sweep.vc SYN_DATA=../data/$(TAG) \
-	       SYN_REPORTS=../reports/sweep/$(TAG) SYN_CLK_NS=$(CLK_PERIOD) SYN_OPT=$(SYN_OPT); \
+	       SYN_REPORTS=../reports/sweep/$(TAG) SYN_CLK_NS=$(CLK_PERIOD) SYN_OPT=$(SYN_OPT) SYN_CG=$(CG); \
 	  $(COMPILE) -files $(SCRIPTS)/sweep_compile.tcl -log synth_$(TAG) | tee $(LOGS)/synth_$(TAG).log
 	python3 $(SCRIPTS)/parse_reports.py $(REPORTS) MODE=$(MODE) SHARES=$(SHARES) H_WIDTH=$(H_WIDTH) \
 	  Q=$(Q) CLK_PERIOD=$(CLK_PERIOD) TTABLE=$(TTABLE_FILE)
@@ -132,6 +135,8 @@ $(VC): FORCE
 	@mkdir -p $(DATA)
 	@echo "+libext+.v+.sv"                          >  $@
 	@echo "+define+SYNTHESIS"                       >> $@
+	@echo "+incdir+../rtl"                         >> $@
+	@for d in $(VC_DEFS); do echo "$$d" >> $@; done
 	@for f in $(RTL_SRC); do echo "../rtl/$$f" >> $@; done
 	@echo "../data/$(TAG)/convert_top.sv"           >> $@
 	@echo "+incdir+/ee/166/CHIPKIT/ip/rtl_inc/"     >> $@

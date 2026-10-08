@@ -7,11 +7,3 @@
 `ifndef SRAM_WIDTH
   `define SRAM_WIDTH 45
 `endif
-// RTSEL / WTSEL are read/write margin-select pins. CONFIRM the values against the datasheet /
-// vendor Verilog model before relying on silicon behaviour (irrelevant for synthesis area/timing).
-`ifndef SRAM_RTSEL_V
-  `define SRAM_RTSEL_V 1
-`endif
-`ifndef SRAM_WTSEL_V
-  `define SRAM_WTSEL_V 0
-`endif

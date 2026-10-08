@@ -18,8 +18,10 @@ module sram_1rw (
     //   BWEB[44:0] (active-low bit write mask), Q[44:0], RTSEL/WTSEL[1:0],
     //   SD / DSLP / SLP (power modes, tied off), PUDELAY (output, unused).
     // Other macros (e.g. 128x64) have the same pins with different widths.
-    localparam logic [1:0] RTSEL_C = `SRAM_RTSEL_V;
-    localparam logic [1:0] WTSEL_C = `SRAM_WTSEL_V;
+    // Static test-select pins: keep constant. Values only matter for silicon (check the SRAM databook).
+    localparam logic [1:0] RTSEL_C = 2'b01;
+    localparam logic [1:0] WTSEL_C = 2'b00;
+
     `SRAM_CELL u_macro (
         .CLK    (clk),
         .CEB    (~en),
