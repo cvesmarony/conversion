@@ -17,7 +17,7 @@ def read(name):
     return open(p, errors="replace").read() if os.path.exists(p) else ""
 
 
-# area 
+# ---- area ------------------------------------------------------------------
 # rows: instance  module  cell_count  cell_area  net_area  total_area ...
 area_txt = read("area.rpt")
 rows = []
@@ -43,7 +43,7 @@ refr = [r for r in rows[1:] if "refresh" in r["inst"].lower() or r["mod"].starts
 area_prng = sum(r["total"] for r in prng) if rows else None
 area_refresh = sum(r["total"] for r in refr) if rows else None
 
-# timing
+# ---- timing ----------------------------------------------------------------
 t_txt = read("timing.rpt")
 slack_ps = None
 m = re.search(r"Path 1:\s*(?:MET|VIOLATED)\s*\((-?[\d.]+)\s*ps\)", t_txt)
@@ -58,7 +58,7 @@ slack_ns = slack_ps / 1000.0 if slack_ps is not None else None
 achieved = (clk - slack_ns) if slack_ns is not None else None
 fmax = (1000.0 / achieved) if achieved and achieved > 0 else None
 
-# power (default activity unless a VCD/TCF was read; clock tree is ideal pre-CTS)
+# ---- power (default activity unless a VCD/TCF was read; clock tree is ideal pre-CTS) ----
 p_txt = read("power.rpt")
 NUM = r"([\d.]+(?:[eE][+-]?\d+)?)"
 def prow(label):
@@ -74,11 +74,19 @@ power_sw = sub[2] if sub else None
 power_reg = reg[3] if reg else None
 power_logic = lgc[3] if lgc else None
 
+# ---- derived ---------------------------------------------------------------
 n = int(meta["SHARES"]); w = int(meta["H_WIDTH"]); q = int(meta["Q"])
 domain = q if meta["MODE"] == "A2B" else 2 ** w
 mem_bits = 2 * domain * n * w
 cycles = domain + (n - 1) * (domain + 1) + 2   # start->done; the testbench prints the measured value
 latency_us = cycles * achieved / 1000.0 if achieved else None
+
+# SRAM estimate: tables built from TS1N16ADFPCLLLVTA512X45M4SWSHOD (512 x 45, 4541.3748 um^2),
+# two banks, rows trimmed to the real domain. An ESTIMATE, not a synthesis result.
+M_DEPTH, M_WIDTH, M_AREA = 512, 45, 4541.3748
+macros = 2 * (-(-domain // M_DEPTH)) * (-(-(n * w) // M_WIDTH))
+sram_est = macros * M_AREA
+total_est = (logic + sram_est) if logic is not None else None
 
 
 def fmt(v, p=3):
@@ -87,10 +95,10 @@ def fmt(v, p=3):
 
 header = ["mode", "shares", "h_width", "q", "ttable", "clk_ns", "slack_ns", "achieved_ns",
           "fmax_mhz", "area_total", "area_tables", "area_logic", "area_prng", "area_refresh", "cells", "power_mw", "p_leak_mw", "p_internal_mw", "p_switch_mw", "p_reg_mw", "p_logic_mw",
-          "table_bits", "est_cycles", "est_latency_us"]
+          "sram_macros", "sram_est_area", "total_est_area", "table_bits", "est_cycles", "est_latency_us", "refresh"]
 row = [meta["MODE"], n, w, q, meta.get("TTABLE", ""), fmt(clk), fmt(slack_ns), fmt(achieved),
        fmt(fmax, 1), fmt(total, 1), fmt(tables, 1), fmt(logic, 1), fmt(area_prng, 1), fmt(area_refresh, 1), fmt(cells), fmt(power_mw), fmt(power_leak, 4), fmt(power_int), fmt(power_sw), fmt(power_reg), fmt(power_logic),
-       mem_bits, cycles, fmt(latency_us, 1)]
+       macros, fmt(sram_est, 1), fmt(total_est, 1), mem_bits, cycles, fmt(latency_us, 1), meta.get("REFRESH", "Refresh.sv")]
 
 os.makedirs("results", exist_ok=True)
 path = "results/summary.csv"
