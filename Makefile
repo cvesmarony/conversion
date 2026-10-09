@@ -37,6 +37,7 @@ CORE_MODULE ?= Convert_Core
 CORE_FILE   ?= Convert_Core.sv
 CORE_RST    ?= RSTN
 TTABLE_FILE ?= TTable.sv
+REFRESH_FILE ?= Refresh.sv
 
 SRAM        ?= 0
 SRAM_CELL   ?= TS1N16ADFPCLLLVTA512X45M4SWSHOD
@@ -73,14 +74,15 @@ VC_DEFS     = +define+USE_SRAM_MACRO +define+SRAM_CELL=$(SRAM_CELL) +define+SRAM
 SRAM_TAG    = _sram
 endif
 
-TAG     = $(MODE)_n$(SHARES)_w$(H_WIDTH)_$(CLK_PERIOD)ns$(SRAM_TAG)
+STUB_TAG = $(if $(filter TTable_stub.sv,$(TTABLE_FILE)),_stub)
+TAG     = $(MODE)_n$(SHARES)_w$(H_WIDTH)_$(CLK_PERIOD)ns$(SRAM_TAG)$(STUB_TAG)
 DATA    = $(RUNDIR)/data/$(TAG)
 REPORTS = $(RUNDIR)/reports/sweep/$(TAG)
 TOP_SV  = $(DATA)/convert_top.sv
 VC      = $(DATA)/sweep.vc
 RTL_SRC = Convert_Defs.sv Refresh.sv PRNG.sv $(SRAM_FILES) $(TTABLE_FILE) $(CORE_FILE)
 
-.PHONY: tell_date sim sim_conv sim_conv_sram sim_conv_gui compile synth wrapper sweep dirs clean genus FORCE
+.PHONY: tell_date sim sim_conv sim_conv_tree sim_conv_sram sim_conv_gui compile synth wrapper sweep dirs clean genus FORCE
 FORCE:
 
 #####################################
@@ -94,6 +96,9 @@ sim: dirs
 
 sim_conv: dirs
 	$(XRUN) -sv -64bit -access +r -timescale 1ns/1ps +define+CORE_MODULE=$(CORE_MODULE)+CORE_RST=$(CORE_RST) -top Convert_Core_tb -f ../rtl/convert.vc -l ./simulation.log
+
+sim_conv_tree: dirs
+	$(XRUN) -sv -64bit -access +r -timescale 1ns/1ps +define+CORE_MODULE=$(CORE_MODULE)+CORE_RST=$(CORE_RST) -top convert_core_tb -f ../rtl/convert_tree.vc -l ./simulation.log
 
 sim_conv_sram: dirs
 	$(XRUN) -sv -64bit -access +r -timescale 1ns/1ps +nospecify +notimingchecks +define+USE_SRAM_MACRO+SRAM_CELL=$(SRAM_CELL)+SRAM_DEPTH=$(SRAM_DEPTH)+SRAM_WIDTH=$(SRAM_WIDTH)+CORE_MODULE=$(CORE_MODULE)+CORE_RST=$(CORE_RST) -top Convert_Core_tb -f ../rtl/convert_sram.vc $(SRAM_VMODEL) -l ./simulation.log
@@ -112,11 +117,11 @@ synth: dirs $(TOP_SV) $(VC)
 	       SYN_REPORTS=../reports/sweep/$(TAG) SYN_CLK_NS=$(CLK_PERIOD) SYN_OPT=$(SYN_OPT) SYN_CG=$(CG); \
 	  $(COMPILE) -files $(SCRIPTS)/sweep_compile.tcl -log synth_$(TAG) | tee $(LOGS)/synth_$(TAG).log
 	python3 $(SCRIPTS)/parse_reports.py $(REPORTS) MODE=$(MODE) SHARES=$(SHARES) H_WIDTH=$(H_WIDTH) \
-	  Q=$(Q) CLK_PERIOD=$(CLK_PERIOD) TTABLE=$(TTABLE_FILE)
+	  Q=$(Q) CLK_PERIOD=$(CLK_PERIOD) TTABLE=$(TTABLE_FILE) REFRESH=$(REFRESH_FILE)
 
 wrapper: dirs $(TOP_SV) $(VC)
 
-# thin top that fixes the parameters and exposes CLK / rst_n / start / x / busy / done / y
+# thin top that fixes the parameters and exposes CLK / RSTN / start / x / busy / done / y
 $(TOP_SV): FORCE
 	@mkdir -p $(DATA)
 	@echo "import Convert_Defs::*;"                                         >  $@
