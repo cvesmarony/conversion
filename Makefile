@@ -32,13 +32,14 @@ SYN_OPT     ?= 1
 CG          ?= 0
 SMOKE       ?= 0
 ARITH_NAME  ?= ZQ
-
+# names as they appear in YOUR rtl/ (see scripts/rtl_src/macro.vc)
 CORE_MODULE ?= Convert_Core
 CORE_FILE   ?= Convert_Core.sv
 CORE_RST    ?= RSTN
 TTABLE_FILE ?= TTable.sv
+# Refresh.sv = serial chain (original), Refresh_tree.sv = balanced-tree variant
 REFRESH_FILE ?= Refresh.sv
-
+# SRAM=1: build the tables from SRAM macros (rtl/TTable_macro.sv + rtl/sram_1rw.sv)
 SRAM        ?= 0
 SRAM_CELL   ?= TS1N16ADFPCLLLVTA512X45M4SWSHOD
 SRAM_DEPTH  ?= 512
@@ -74,13 +75,14 @@ VC_DEFS     = +define+USE_SRAM_MACRO +define+SRAM_CELL=$(SRAM_CELL) +define+SRAM
 SRAM_TAG    = _sram
 endif
 
+TREE_TAG = $(if $(filter Refresh_tree.sv,$(REFRESH_FILE)),_tree)
 STUB_TAG = $(if $(filter TTable_stub.sv,$(TTABLE_FILE)),_stub)
-TAG     = $(MODE)_n$(SHARES)_w$(H_WIDTH)_$(CLK_PERIOD)ns$(SRAM_TAG)$(STUB_TAG)
+TAG     = $(MODE)_n$(SHARES)_w$(H_WIDTH)_$(CLK_PERIOD)ns$(SRAM_TAG)$(STUB_TAG)$(TREE_TAG)
 DATA    = $(RUNDIR)/data/$(TAG)
 REPORTS = $(RUNDIR)/reports/sweep/$(TAG)
 TOP_SV  = $(DATA)/convert_top.sv
 VC      = $(DATA)/sweep.vc
-RTL_SRC = Convert_Defs.sv Refresh.sv PRNG.sv $(SRAM_FILES) $(TTABLE_FILE) $(CORE_FILE)
+RTL_SRC = Convert_Defs.sv $(REFRESH_FILE) PRNG.sv $(SRAM_FILES) $(TTABLE_FILE) $(CORE_FILE)
 
 .PHONY: tell_date sim sim_conv sim_conv_tree sim_conv_sram sim_conv_gui compile synth wrapper sweep dirs clean genus FORCE
 FORCE:
@@ -94,12 +96,15 @@ tell_date:
 sim: dirs
 	$(XRUN) -sv -gui -64bit -lwdgen -access rwc -verisium +incdir+../rtl -top Convert_Core_tb -f ../rtl/convert.vc -l ./simulation.log
 
+# Convert_Core self-checking testbench (prints ALL TESTS PASSED / TEST FAILED)
 sim_conv: dirs
 	$(XRUN) -sv -64bit -access +r -timescale 1ns/1ps +define+CORE_MODULE=$(CORE_MODULE)+CORE_RST=$(CORE_RST) -top Convert_Core_tb -f ../rtl/convert.vc -l ./simulation.log
 
+# same testbench with the balanced-tree Refresh
 sim_conv_tree: dirs
-	$(XRUN) -sv -64bit -access +r -timescale 1ns/1ps +define+CORE_MODULE=$(CORE_MODULE)+CORE_RST=$(CORE_RST) -top convert_core_tb -f ../rtl/convert_tree.vc -l ./simulation.log
+	$(XRUN) -sv -64bit -access +r -timescale 1ns/1ps +define+CORE_MODULE=$(CORE_MODULE)+CORE_RST=$(CORE_RST) -top Convert_Core_tb -f ../rtl/convert_tree.vc -l ./simulation.log
 
+# simulate with the real macro's vendor Verilog model (checks the pin map in rtl/sram_1rw.sv)
 sim_conv_sram: dirs
 	$(XRUN) -sv -64bit -access +r -timescale 1ns/1ps +nospecify +notimingchecks +define+USE_SRAM_MACRO+SRAM_CELL=$(SRAM_CELL)+SRAM_DEPTH=$(SRAM_DEPTH)+SRAM_WIDTH=$(SRAM_WIDTH)+CORE_MODULE=$(CORE_MODULE)+CORE_RST=$(CORE_RST) -top Convert_Core_tb -f ../rtl/convert_sram.vc $(SRAM_VMODEL) -l ./simulation.log
 
